@@ -1,0 +1,5 @@
+name: om | Age: 19 | City: solapur | Marks: 90.0 | Result: Pass
+name: rahul | Age: 19 | City: pune | Marks: 34.0 | Result: Fail
+name: rudra | Age: 10 | City: pune | Marks: 35.0 | Result: Pass
+
+name: son | Age: 19 | City: solapur | Marks: 36.0 | Result: Pass
