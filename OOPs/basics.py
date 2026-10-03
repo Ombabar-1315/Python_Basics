@@ -1,24 +1,22 @@
-class Student:
+class adult:
+    def __init__(self,name,age):
+        self.name = name
+        self.age = age
 
-    def __init__(self,marks):
-        self.__marks = marks
-
-    @property
-    def marks(self):
-        return self.__marks
+    def AgeChecker(self):
+        if self.age >= 18:
+            print("You are eligible.")
+        
 
 
-    @marks.setter
-    def marks(self,value):
-        if 0 <= value <=100:
-            self.__marks = value
-        else:
-            print("Invalid")
+class minor(adult):
 
-s = Student(90)
-print(s.marks)
+    def AgeChecker(self):
+        super().AgeChecker()
+        if self.age < 18:
+            print("Your Not Eligible")
 
-s.marks = 98
-print(s.marks)
-    
+
+m = minor("om",19)
+m.AgeChecker()
         
