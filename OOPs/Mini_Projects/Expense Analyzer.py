@@ -1,17 +1,28 @@
-import csv 
+import csv
 import json
+
+
+# ==============================
+# Custom Exception
+# ==============================
 
 class InvalidExpenseError(Exception):
     pass
 
 
+# ==============================
+# Expense Class
+# ==============================
+
 class Expense:
 
-    def __init__(self,title,amount,category,date):
+    def __init__(self, title, amount, category, date):
         self.title = title
-        self.__amount = amount
+        self.__amount = 0
         self.category = category
         self.date = date
+
+        # Use setter for validation
         self.amount = amount
 
     @property
@@ -19,7 +30,7 @@ class Expense:
         return self.__amount
 
     @amount.setter
-    def amount(self,value):
+    def amount(self, value):
         if value > 0:
             self.__amount = value
         else:
@@ -27,171 +38,244 @@ class Expense:
                 "Amount must be greater than 0."
             )
 
+    def show_expense(self):
+        print("Title:", self.title)
+        print("Amount:", self.amount)
+        print("Category:", self.category)
+        print("Date:", self.date)
 
-    
-    def show_expenses(self):
-        print("Title: ",self.title)
-        print("Amount: ",self.amount)
-        print("Category: ",self.category)
-        print("Date: ",self.date)
 
-    # def calculate_price(self,quantity):
-    #     total_price = self.amount * quantity
-    #     return total_price  
-    
-
+# ==============================
+# Online Expense
+# ==============================
 
 class OnlineExpense(Expense):
 
-    def __init__(self, title, amount, category, date,platform):
+    def __init__(self, title, amount, category, date, platform):
         super().__init__(title, amount, category, date)
         self.platform = platform
 
-
-    def show_expenses(self):
-         super().show_expenses()
-         print("Platform: ",self.platform)
-
+    def show_expense(self):
+        super().show_expense()
+        print("Platform:", self.platform)
 
 
+# ==============================
+# Add Expense
+# ==============================
 
 expenses = []
 
-def add_expense(**details):
-    try:
 
+def add_expense():
+
+    try:
         title = input("Enter Expense Title: ")
         amount = float(input("Enter Amount: "))
         category = input("Enter Category: ")
         date = input("Enter Date: ")
 
         while True:
-                
-                print("\nExpense Type:")
-                print("1.Offline")
-                print("2.Online")
-            
-                choice = int(input("Enter Choice."))
-                if choice == 1:
-                    expense = Expense(title, amount, category, date)
-                    expenses.append(expense)
-                    print("Expense Added Successfully.")
-                    break
 
-                elif choice == 2:
-                    platform = input("Enter Platform: ")
-                    expense = OnlineExpense(title, amount, category, date,platform)
-                    expenses.append(expense)
-                    print("Expense Added Successfully")
-                    break
+            print("\nExpense Type:")
+            print("1. Offline")
+            print("2. Online")
 
-                else:
-                    print("Enter Valid Choice.")
+            choice = int(input("Enter Choice: "))
+
+            if choice == 1:
+
+                expense = Expense(
+                    title,
+                    amount,
+                    category,
+                    date
+                )
+
+                expenses.append(expense)
+
+                print("Expense Added Successfully.")
+                break
+
+            elif choice == 2:
+
+                platform = input("Enter Platform: ")
+
+                expense = OnlineExpense(
+                    title,
+                    amount,
+                    category,
+                    date,
+                    platform
+                )
+
+                expenses.append(expense)
+
+                print("Online Expense Added Successfully.")
+                break
+
+            else:
+                print("Enter Valid Choice.")
 
     except ValueError:
-        print("Invalid input. Please enter a valid amount.")
+        print("Invalid input. Please enter a valid number.")
 
     except InvalidExpenseError as e:
-        print("Invalid Expense:",e)
+        print("Invalid Expense:", e)
 
 
+# ==============================
+# Display Expenses
+# ==============================
 
-def show_all_expense(expenses):
-   if not expenses:
-       print("\n No expenses availble.")
-       return
-   
-   for exp in expenses:
-       exp.show_expenses()
-       print("--------------------------")
-        
-    
+def show_expenses():
+
+    if not expenses:
+        print("\nNo expenses available.")
+        return
+
+    print("\n========== ALL EXPENSES ==========")
+
+    for i, expense in enumerate(expenses, start=1):
+
+        print(f"\nExpense {i}")
+        print("----------------")
+
+        expense.show_expense()
+
+
+# ==============================
+# Calculate Total
+# ==============================
 
 def calculate_total(expenses):
+
     total = 0
-    for i in expenses:
-        total  += i.amount
+
+    for expense in expenses:
+        total += expense.amount
 
     return total
 
 
-def calculate_average(expenses):
-    total = calculate_total(expenses)
-    number = len(expenses)
+# ==============================
+# Calculate Average
+# ==============================
 
-    average = total / number
+def calculate_average(expenses):
+
+    if not expenses:
+        return 0
+
+    total = calculate_total(expenses)
+
+    average = total / len(expenses)
 
     return average
 
 
+# ==============================
+# Find Highest Expense
+# ==============================
+
 def find_highest(expenses):
+
     if not expenses:
         return None, None
-    
-    high = expenses[0]
-    high_name = ""
 
-    for exp in expenses:
-        if exp.amount > high:
-            high = exp.amount
-            high_name = exp.title
+    highest = expenses[0]
 
-    return high_name,high
+    for expense in expenses:
 
+        if expense.amount > highest.amount:
+            highest = expense
+
+    return highest.title, highest.amount
+
+
+# ==============================
+# Find Lowest Expense
+# ==============================
 
 def find_lowest(expenses):
 
     if not expenses:
         return None, None
-    
-    low = expenses[0].amount
-    low_name = expenses[0].title
 
-    for exp in expenses:
-        if exp.amount < low:
-            low = exp.amount
-            low_name = exp.title
+    lowest = expenses[0]
 
-    return low_name,low
+    for expense in expenses:
+
+        if expense.amount < lowest.amount:
+            lowest = expense
+
+    return lowest.title, lowest.amount
 
 
+# ==============================
+# Category Totals
+# ==============================
 
 def calculate_category_totals(expenses):
+
     category_totals = {}
 
     for expense in expenses:
+
         category = expense.category
-        amount = expense.amount
 
         if category in category_totals:
-            category_totals[category] += amount
+            category_totals[category] += expense.amount
+
         else:
-            category_totals[category] = amount
+            category_totals[category] = expense.amount
 
     return category_totals
 
 
-def unique_category(expenses):
+# ==============================
+# Unique Categories
+# ==============================
+
+def unique_categories(expenses):
+
     categories = set()
 
-    for exp in expenses:
-        categories.add(exp.category)
+    for expense in expenses:
+        categories.add(expense.category)
 
     return categories
 
 
-def calculate_amount(*expenses):
-    total = sum(expenses)
+# ==============================
+# *args Example
+# ==============================
+
+def calculate_amount(*amounts):
+
+    total = 0
+
+    for amount in amounts:
+        total += amount
+
     return total
 
 
-def add_expenses_details(**details):
+# ==============================
+# **kwargs Example
+# ==============================
 
-    print("\nAdditional Expenses Details.")
+def add_expense_details(**details):
 
-    for key , value in details.items():
-        print(f"{key}:{value}")
+    print("\nAdditional Expense Details:")
 
+    for key, value in details.items():
+        print(f"{key}: {value}")
+
+
+# ==============================
+# Show Analysis
+# ==============================
 
 def show_analysis():
 
@@ -202,59 +286,73 @@ def show_analysis():
     total = calculate_total(expenses)
     average = calculate_average(expenses)
 
-    high_name , high_amount = find_highest(expenses)
-    low_name , low_amount = find_lowest(expenses)
+    high_name, high_amount = find_highest(expenses)
+    low_name, low_amount = find_lowest(expenses)
 
-    print("\n================ Expenses Analysis =================")
+    print("\n========== EXPENSE ANALYSIS ==========")
 
-    print("Total Expenses: ",total)
-    print("Average Expenses: ",average)
+    print("Total Expense:", total)
+    print("Average Expense:", round(average, 2))
 
-    print("Highest Name: ",high_name)
-    print("Highest Amount: ",high_amount)
+    print("Highest Expense:", high_name)
+    print("Highest Amount:", high_amount)
 
-    print("Lowest Name: ",low_name)
-    print("Lowest amount: ",low_amount)
+    print("Lowest Expense:", low_name)
+    print("Lowest Amount:", low_amount)
 
+
+# ==============================
+# Category Analysis
+# ==============================
 
 def show_category_analysis():
+
     if not expenses:
         print("\nNo expenses available.")
         return
 
     category_totals = calculate_category_totals(expenses)
-    categories = unique_category(expenses)
+    categories = unique_categories(expenses)
 
-    print("\n=========== CATEGORY ANALYSIS ================")
+    print("\n========== CATEGORY ANALYSIS ==========")
 
     print("\nCategory Totals:")
 
     for category, amount in category_totals.items():
-        print(f"{category} : {amount}")
+        print(f"{category}: {amount}")
 
-    print("\nUnique Categories.")
+    print("\nUnique Categories:")
 
     for category in categories:
         print(category)
 
 
+# ==============================
+# Save CSV
+# ==============================
 
 def save_csv():
+
     try:
 
+        with open(
+            "expenses.csv",
+            "w",
+            newline=""
+        ) as file:
 
-         with open("expenses.csv","w",newline="") as file:
-             writer = csv.writer(file)
+            writer = csv.writer(file)
 
-             writer.writerow([
-                 "Title",
-                 "Amount",
-                 "Category",
-                 "Date",
-                 "Platform"
-             ])
+            writer.writerow([
+                "Title",
+                "Amount",
+                "Category",
+                "Date",
+                "Type",
+                "Platform"
+            ])
 
-         for expense in expenses:
+            for expense in expenses:
 
                 if isinstance(expense, OnlineExpense):
 
@@ -275,12 +373,15 @@ def save_csv():
                     platform
                 ])
 
-         print("Data saved successfully to expenses.csv.")
+        print("Data saved successfully to expenses.csv.")
 
     except OSError as e:
-            print("Error while saving CSV:", e)
+        print("Error while saving CSV:", e)
 
 
+# ==============================
+# Save JSON Summary
+# ==============================
 
 def save_json():
 
@@ -307,7 +408,7 @@ def save_json():
             },
             "category_totals": category_totals,
             "unique_categories": list(
-                unique_category(expenses)
+                unique_categories(expenses)
             )
         }
 
@@ -327,6 +428,10 @@ def save_json():
     except OSError as e:
         print("Error while saving JSON:", e)
 
+
+# ==============================
+# Read JSON
+# ==============================
 
 def read_json():
 
@@ -352,15 +457,20 @@ def read_json():
     except json.JSONDecodeError:
         print("Invalid JSON data.")
 
-    
-    
+
+# ==============================
+# Main Menu
+# ==============================
+
 print("=================================")
-print("\t Expense Analyzer ")
+print("\t EXPENSE ANALYZER")
 print("=================================")
 
+
 while True:
+
     try:
-       
+
         print("\n1. Add Expense")
         print("2. Show Expenses")
         print("3. Show Analysis")
@@ -372,53 +482,67 @@ while True:
         print("9. Show **kwargs Example")
         print("10. Exit")
 
+        choice = int(input("\nEnter Choice: "))
 
-        choice = int(input("Enter Choice: "))
         if choice == 1:
+
             add_expense()
 
         elif choice == 2:
-            show_all_expense()
+
+            show_expenses()
 
         elif choice == 3:
+
             show_analysis()
 
         elif choice == 4:
+
             show_category_analysis()
 
         elif choice == 5:
+
             save_csv()
 
         elif choice == 6:
+
             save_json()
 
         elif choice == 7:
+
             read_json()
 
         elif choice == 8:
-            a = float(input("Enter first Amount: "))
-            b = float(input("Enter second Amount: "))
-            c = float(input("Enter third Amount: "))
 
-            result = calculate_amount(a,b,c)
-            print("Total :",result)
+            amount1 = float(input("Enter first amount: "))
+            amount2 = float(input("Enter second amount: "))
+            amount3 = float(input("Enter third amount: "))
+
+            result = calculate_amount(
+                amount1,
+                amount2,
+                amount3
+            )
+
+            print("Total:", result)
 
         elif choice == 9:
-            add_expenses_details(
-                payment_method = "Online",
-                note = "Food Order",
-                location = "Home"
-            )           
 
+            add_expense_details(
+                payment_method="Online",
+                note="Food order",
+                location="Home"
+            )
 
         elif choice == 10:
-             print("Thank you for using Expense Analyzer.")
-             break
 
+            print("Thank you for using Expense Analyzer.")
+            break
 
         else:
-            print("Enter a valid choice.") 
-   
+
+            print("Enter a valid choice.")
 
     except ValueError:
-         print("Invalid input. Please enter a number.")
+
+        print("Invalid input. Please enter a number.")
